@@ -12,7 +12,8 @@ cdef extern from "X11/Xlib.h":
     
     Display *XOpenDisplay(char* display_name)
     int XCloseDisplay(Display *display)
-    
+    int XFlush(Display* display)
+
     ctypedef unsigned int XID
     ctypedef XID KeySym
 
@@ -36,20 +37,20 @@ cdef keycode(Display *dpy, key_string):
     if ks == NoSymbol:
         raise ValueError("no symbol for key %r" % key_string)
 
-    kc = XKeysymToKeycode(dpy, ks )
+    kc = XKeysymToKeycode(dpy, ks)
     return <int>kc
 
 cdef class XTest:
     cdef Display *dpy
     def __init__(self, display=":0.0"):
-        self.dpy = XOpenDisplay( display )
+        self.dpy = XOpenDisplay(display)
         if self.dpy is NULL:
             raise ValueError("unable to open display %r" % display)
 
     def __dealloc__(self):
         XCloseDisplay(self.dpy)
 
-    def fakeKeyEvent(self, key):
+    def fakeKeyEvent(self, key, down=True, up=True):
         """key is a Tk-style list of modifiers and key name, such as:
 
         'p'
@@ -72,10 +73,12 @@ cdef class XTest:
             if k in ['Shift','Alt','Control']:
                 k = '%s_L' % k
             presses.append(keycode(self.dpy, k))
-            
-        for k in presses:
-            XTestFakeKeyEvent(d, k, True, CurrentTime)
-        for k in presses[::-1]:
-            XTestFakeKeyEvent(d, k, False, CurrentTime)
 
+        if down:
+            for k in presses:
+                XTestFakeKeyEvent(d, k, True, CurrentTime)
+        if up:
+            for k in presses[::-1]:
+                XTestFakeKeyEvent(d, k, False, CurrentTime)
+        XFlush(d)
       

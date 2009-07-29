@@ -22,12 +22,20 @@ cdef extern from "X11/Xlib.h":
     KeySym XStringToKeysym(char* string)
     KeyCode XKeysymToKeycode(Display* display, KeySym keysym)
 NoSymbol = 0 
-CurrentTime = 0#   /* special Time */
+CurrentTime = long(0) #   /* special Time */
 
 cdef extern from "X11/extensions/XTest.h":
     int XTestFakeKeyEvent(Display* dpy, unsigned int keycode,
                           int is_press, # (actually Bool)
                           unsigned long delay)
+
+    
+    int XTestFakeButtonEvent(Display *display, unsigned int button,
+                             int is_press, # (actually Bool)
+                             unsigned long delay)
+
+    int XTestFakeMotionEvent(Display *display, int screen_number,
+                             int x, int y, unsigned long delay)
 
 cdef keycode(Display *dpy, key_string):
     cdef KeyCode kc
@@ -58,6 +66,10 @@ cdef class XTest:
         'Shift-p'
         'Alt-Shift-p'
         'space'
+
+        This function can send both down and up events (for all the
+        required keys), or you can disable the down or up steps by
+        setting those args to False.
         
         """
         cdef Display *d
@@ -82,3 +94,24 @@ cdef class XTest:
                 XTestFakeKeyEvent(d, k, False, CurrentTime)
         XFlush(d)
       
+    def fakeButtonEvent(self, button, is_press):
+        """
+        button is the "logical button" according to the XTestFakeButtonEvent
+        man page. It seems like 0 is the LMB, etc.
+        
+        Set is_press to True for a press; False for a release
+        """
+        cdef Display *d
+        d = self.dpy
+        XTestFakeButtonEvent(d, button, is_press, CurrentTime)
+
+    def fakeMotionEvent(self, x, y, screen_number=-1):
+        """
+        x, y are coordinates on a screen.
+
+        The default is to use the screen that the pointer is currently
+        on, but you can pass an alternate screen number.
+        """
+        cdef Display *d
+        d = self.dpy
+        XTestFakeMotionEvent(d, screen_number, x, y, CurrentTime)

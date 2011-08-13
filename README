@@ -1,0 +1,3 @@
+pyrex interface to XTest including faking multi-key presses such as Control-Shift-s
+
+version 1.21 adds fakeRelativeMotionEvent and the missing flush calls

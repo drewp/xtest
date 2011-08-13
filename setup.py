@@ -4,11 +4,11 @@ from Pyrex.Distutils import build_ext
 
 setup(name="xtest",
       version="1.21",
-      description="pyrex interface to XTest including faking multi-key presses such as Control-Shift-s (version 1.21 adds fakeRelativeMotionEvent and the missing flush calls)",
+      description="pyrex interface to XTest including faking multi-key presses such as Control-Shift-s",
       author="Drew Perttula",
       author_email="drewp@bigasterisk.com",
       url="http://bigasterisk.com/darcs/?r=xtest",
-      download_url="http://projects.bigasterisk.com/xtest-1.2.tar.gz",
+      download_url="http://projects.bigasterisk.com/xtest-1.21.tar.gz",
       classifiers=[
           "Development Status :: 5 - Production/Stable",
           "Environment :: X11 Applications",

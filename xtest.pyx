@@ -5,7 +5,11 @@ such as Control-Shift-Alt-space
 see http://hoopajoo.net/projects/xautomation.html (gnu) for other examples
 
 see http://homepage3.nifty.com/tsato/xvkbd/events.html for more about
-keys with modifiers """
+keys with modifiers
+
+Thanks to:
+  Wladimir (fakeRelativeMotionEvent)
+"""
 
 cdef extern from "X11/Xlib.h":
     ctypedef struct Display
@@ -35,6 +39,9 @@ cdef extern from "X11/extensions/XTest.h":
                              unsigned long delay)
 
     int XTestFakeMotionEvent(Display *display, int screen_number,
+                             int x, int y, unsigned long delay)
+
+    int XTestFakeRelativeMotionEvent(Display *display,
                              int x, int y, unsigned long delay)
 
 cdef keycode(Display *dpy, key_string):
@@ -104,6 +111,7 @@ cdef class XTest:
         cdef Display *d
         d = self.dpy
         XTestFakeButtonEvent(d, button, is_press, CurrentTime)
+        XFlush(d)
 
     def fakeMotionEvent(self, x, y, screen_number=-1):
         """
@@ -115,3 +123,13 @@ cdef class XTest:
         cdef Display *d
         d = self.dpy
         XTestFakeMotionEvent(d, screen_number, x, y, CurrentTime)
+        XFlush(d)
+
+    def fakeRelativeMotionEvent(self, dx, dy):
+        """
+        dx, dy are offsets to be applied to the screen coordinates.
+        """
+        cdef Display *d
+        d = self.dpy
+        XTestFakeRelativeMotionEvent(d, dx, dy, CurrentTime)
+        XFlush(d)
